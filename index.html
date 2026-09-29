@@ -1,0 +1,1598 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" class="dark scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>آرین | Arin - Creative 3D Developer & Digital Architect</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f3ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            accent: '#a855f7',
+                            cyan: '#06b6d4',
+                            gold: '#eab308',
+                            dark: '#030712',
+                            card: 'rgba(15, 23, 42, 0.75)'
+                        }
+                    },
+                    fontFamily: {
+                        fa: ['Vazirmatn', 'sans-serif'],
+                        en: ['Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace']
+                    },
+                    animation: {
+                        'glow-pulse': 'glowPulse 4s infinite ease-in-out',
+                        'float': 'float 5s infinite ease-in-out',
+                        'spin-slow': 'spin 25s linear infinite'
+                    },
+                    keyframes: {
+                        glowPulse: {
+                            '0%, 100%': { opacity: '0.3', filter: 'blur(30px)' },
+                            '50%': { opacity: '0.7', filter: 'blur(50px)' }
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
+                            '50%': { transform: 'translateY(-15px) rotate(1deg)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts & FontAwesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Vazirmatn:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Animation Libraries: GSAP & Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <style>
+        * {
+            cursor: none !important;
+        }
+
+        body {
+            font-family: 'Vazirmatn', 'Plus Jakarta Sans', sans-serif;
+            background-color: #030712;
+            color: #f3f4f6;
+            overflow-x: hidden;
+        }
+
+        body.lang-en {
+            font-family: 'Plus Jakarta Sans', 'Vazirmatn', sans-serif;
+        }
+
+        /* Glassmorphism Styles */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: border-color 0.4s ease, box-shadow 0.4s ease;
+        }
+
+        .glass-card:hover {
+            border-color: rgba(168, 85, 247, 0.4);
+            box-shadow: 0 10px 30px -10px rgba(168, 85, 247, 0.3);
+        }
+
+        /* Animated Custom Cursor */
+        #cursor-dot {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 8px;
+            height: 8px;
+            background-color: #06b6d4;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: width 0.2s, height 0.2s, background-color 0.2s;
+        }
+
+        #cursor-outline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 40px;
+            height: 40px;
+            border: 1.5px solid rgba(168, 85, 247, 0.5);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9998;
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s ease-out, width 0.2s, height 0.2s, border-color 0.2s;
+        }
+
+        .cursor-hover #cursor-dot {
+            width: 14px;
+            height: 14px;
+            background-color: #a855f7;
+        }
+        .cursor-hover #cursor-outline {
+            width: 60px;
+            height: 60px;
+            border-color: rgba(6, 182, 212, 0.8);
+            background: rgba(6, 182, 212, 0.05);
+        }
+
+        /* Text Gradient Effects */
+        .text-gradient-purple {
+            background: linear-gradient(135deg, #a855f7 0%, #6366f1 50%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .text-gradient-gold {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Shimmer Button Effect */
+        .btn-shimmer {
+            background: linear-gradient(90deg, #6366f1, #a855f7, #06b6d4, #6366f1);
+            background-size: 300% 100%;
+            transition: all 0.4s ease;
+        }
+        .btn-shimmer:hover {
+            background-position: 100% 0;
+            box-shadow: 0 0 30px rgba(168, 85, 247, 0.6);
+        }
+
+        /* 3D Tilt Card Base */
+        .tilt-card {
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #030712; }
+        ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #374151; }
+    </style>
+</head>
+<body class="selection:bg-purple-500 selection:text-white relative min-h-screen">
+
+    <!-- Interactive Dual Cursor -->
+    <div id="cursor-dot"></div>
+    <div id="cursor-outline"></div>
+
+    <!-- 3D Three.js WebGL Canvas Background -->
+    <canvas id="webgl-canvas" class="fixed top-0 left-0 w-full h-full pointer-events-none z-0 opacity-60"></canvas>
+
+    <!-- Glowing Background Aura Lights -->
+    <div class="fixed top-1/4 right-10 w-96 h-96 bg-purple-600/20 rounded-full filter blur-[140px] pointer-events-none animate-glow-pulse"></div>
+    <div class="fixed bottom-1/4 left-10 w-96 h-96 bg-cyan-600/20 rounded-full filter blur-[140px] pointer-events-none animate-glow-pulse" style="animation-delay: 2s;"></div>
+
+    <!-- Navigation Bar -->
+    <header class="fixed top-0 left-0 w-full z-50 transition-all duration-300 py-5 px-6 md:px-12" id="navbar">
+        <div class="max-w-7xl mx-auto flex items-center justify-between glass-panel rounded-2xl px-6 py-3 border border-white/10 shadow-2xl">
+            
+            <!-- Brand Logo -->
+            <a href="#hero" class="group flex items-center gap-3 cursor-pointer">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 via-indigo-500 to-cyan-400 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-purple-500/30 group-hover:scale-105 transition-transform duration-300">
+                    آ
+                </div>
+                <span class="text-xl font-extrabold tracking-wider text-white group-hover:text-purple-400 transition-colors">
+                    ARIN<span class="text-cyan-400">.</span>
+                </span>
+            </a>
+
+            <!-- Desktop Navigation Links -->
+            <nav class="hidden md:flex items-center gap-6 font-medium text-xs lg:text-sm text-gray-300">
+                <a href="#about" class="hover:text-purple-400 transition-colors cursor-pointer" data-i18n="nav_about">درباره من</a>
+                <a href="#services" class="hover:text-purple-400 transition-colors cursor-pointer" data-i18n="nav_services">خدمات</a>
+                <a href="#skills" class="hover:text-purple-400 transition-colors cursor-pointer" data-i18n="nav_skills">تخصص‌ها</a>
+                <a href="#lab" class="hover:text-cyan-400 transition-colors cursor-pointer text-cyan-300 font-mono" data-i18n="nav_lab">⚡ آزمایشگاه</a>
+                <a href="#projects" class="hover:text-purple-400 transition-colors cursor-pointer" data-i18n="nav_projects">پروژه‌ها</a>
+                <a href="#experience" class="hover:text-purple-400 transition-colors cursor-pointer" data-i18n="nav_experience">مسیر من</a>
+                <a href="#faq" class="hover:text-purple-400 transition-colors cursor-pointer" data-i18n="nav_faq">سوالات</a>
+                <a href="#contact" class="hover:text-purple-400 transition-colors cursor-pointer" data-i18n="nav_contact">ارتباط</a>
+            </nav>
+
+            <!-- Control Actions: Sound & Language Switcher -->
+            <div class="flex items-center gap-3">
+                <!-- Sound Synthesizer Button -->
+                <button id="sound-btn" title="Audio Effects" class="w-10 h-10 rounded-xl glass-panel flex items-center justify-center text-gray-300 hover:text-purple-400 border border-white/10 hover:border-purple-500/50 transition-all cursor-pointer">
+                    <i class="fa-solid fa-volume-xmark text-sm" id="sound-icon"></i>
+                </button>
+
+                <!-- Language Toggle Button (FA / EN) -->
+                <button id="lang-btn" class="px-3.5 py-2 rounded-xl glass-panel text-xs font-mono font-bold text-cyan-400 border border-cyan-500/30 hover:border-cyan-400 transition-all flex items-center gap-1.5 cursor-pointer">
+                    <i class="fa-solid fa-globe text-purple-400"></i>
+                    <span id="lang-label">EN</span>
+                </button>
+
+                <!-- Contact CTA Button -->
+                <a href="#contact" class="hidden sm:inline-flex btn-shimmer px-5 py-2 rounded-xl text-white text-xs font-bold shadow-lg cursor-pointer items-center gap-2" data-i18n="nav_cta">
+                    <span>گفتگو با آرین</span>
+                    <i class="fa-solid fa-arrow-left text-xs text-cyan-300" id="cta-arrow"></i>
+                </a>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobile-toggle" class="md:hidden w-10 h-10 rounded-xl glass-panel flex items-center justify-center text-white cursor-pointer">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Nav Drawer -->
+        <div id="mobile-menu" class="hidden md:hidden max-w-7xl mx-auto mt-2 glass-panel rounded-2xl p-6 border border-white/10 shadow-2xl flex-col gap-4 text-center text-sm">
+            <a href="#about" class="py-1.5 hover:text-purple-400 transition-colors mobile-link" data-i18n="nav_about">درباره من</a>
+            <a href="#services" class="py-1.5 hover:text-purple-400 transition-colors mobile-link" data-i18n="nav_services">خدمات</a>
+            <a href="#skills" class="py-1.5 hover:text-purple-400 transition-colors mobile-link" data-i18n="nav_skills">تخصص‌ها</a>
+            <a href="#lab" class="py-1.5 text-cyan-400 hover:text-cyan-300 transition-colors mobile-link font-mono" data-i18n="nav_lab">⚡ آزمایشگاه</a>
+            <a href="#projects" class="py-1.5 hover:text-purple-400 transition-colors mobile-link" data-i18n="nav_projects">پروژه‌ها</a>
+            <a href="#experience" class="py-1.5 hover:text-purple-400 transition-colors mobile-link" data-i18n="nav_experience">مسیر من</a>
+            <a href="#faq" class="py-1.5 hover:text-purple-400 transition-colors mobile-link" data-i18n="nav_faq">سوالات</a>
+            <a href="#contact" class="py-1.5 hover:text-purple-400 transition-colors mobile-link" data-i18n="nav_contact">ارتباط</a>
+        </div>
+    </header>
+
+    <!-- Audio Toast Feedback Container -->
+    <div id="toast" class="fixed top-24 left-1/2 -translate-x-1/2 glass-panel border border-purple-500/50 text-white px-6 py-3 rounded-2xl shadow-2xl transition-all duration-300 opacity-0 pointer-events-none z-50 text-xs flex items-center gap-3">
+        <i class="fa-solid fa-sparkles text-cyan-400"></i>
+        <span id="toast-msg">پیام</span>
+    </div>
+
+    <!-- Hero Section -->
+    <section id="hero" class="relative min-h-screen flex items-center justify-center pt-32 pb-20 px-6">
+        <div class="max-w-5xl mx-auto text-center z-10">
+            
+            <!-- Availability Badge -->
+            <div class="inline-flex items-center gap-2.5 px-4 py-2 rounded-full glass-panel border border-cyan-500/30 text-cyan-300 text-xs md:text-sm font-medium mb-8 animate-float">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                <span data-i18n="hero_badge">آماده پذیرش پروژه‌های خفن و بین‌المللی</span>
+            </div>
+
+            <!-- Dynamic Multilingual Heading -->
+            <h1 class="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight mb-6 leading-tight">
+                <span data-i18n="hero_greeting">سلام، من</span> <span class="text-gradient-purple underline decoration-purple-500/30 underline-offset-8" data-i18n="hero_name">آرین</span> <span data-i18n="hero_greeting_end">هستم</span>
+            </h1>
+
+            <!-- Dynamic Animated Subtitle typing -->
+            <div class="text-lg sm:text-2xl text-gray-300 font-light mb-10 max-w-3xl mx-auto h-12 flex items-center justify-center">
+                <span id="typed-text" class="border-l-2 border-purple-500 px-2 font-mono text-cyan-300"></span>
+            </div>
+
+            <!-- Descriptive Paragraph -->
+            <p class="text-gray-400 text-base md:text-lg max-w-2xl mx-auto mb-10 leading-relaxed font-light" data-i18n="hero_desc">
+                معمار تجارب دیجیتال مدرن، برنامه‌نویس خلاق و طراح وب‌سایت‌های ۳ بعدی و تعاملی. خلق پلتفرم‌های متمایز با ترکیب هنر، کد و انیمیشن.
+            </p>
+
+            <!-- Hero Magnetic Action Buttons -->
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-5">
+                <a href="#projects" class="btn-shimmer magnetic-btn px-8 py-4 rounded-2xl text-white font-bold text-base shadow-xl w-full sm:w-auto flex items-center justify-center gap-3 group">
+                    <span data-i18n="hero_cta1">دیدن نمونه کارها</span>
+                    <i class="fa-solid fa-eye group-hover:scale-110 transition-transform"></i>
+                </a>
+                <a href="#contact" class="magnetic-btn px-8 py-4 rounded-2xl glass-panel border border-white/15 text-white font-bold text-base hover:bg-white/10 transition-all w-full sm:w-auto flex items-center justify-center gap-3">
+                    <span data-i18n="hero_cta2">ارتباط با آرین</span>
+                    <i class="fa-solid fa-paper-plane text-purple-400"></i>
+                </a>
+            </div>
+
+            <!-- Quick Social Icons -->
+            <div class="mt-16 flex items-center justify-center gap-6 text-gray-400">
+                <a href="#" class="w-12 h-12 rounded-2xl glass-panel border border-white/10 flex items-center justify-center hover:text-purple-400 hover:border-purple-500/50 hover:scale-110 transition-all">
+                    <i class="fa-brands fa-github text-xl"></i>
+                </a>
+                <a href="#" class="w-12 h-12 rounded-2xl glass-panel border border-white/10 flex items-center justify-center hover:text-cyan-400 hover:border-cyan-500/50 hover:scale-110 transition-all">
+                    <i class="fa-brands fa-linkedin-in text-xl"></i>
+                </a>
+                <a href="#" class="w-12 h-12 rounded-2xl glass-panel border border-white/10 flex items-center justify-center hover:text-purple-400 hover:border-purple-500/50 hover:scale-110 transition-all">
+                    <i class="fa-brands fa-instagram text-xl"></i>
+                </a>
+                <a href="#" class="w-12 h-12 rounded-2xl glass-panel border border-white/10 flex items-center justify-center hover:text-cyan-400 hover:border-cyan-500/50 hover:scale-110 transition-all">
+                    <i class="fa-brands fa-telegram text-xl"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-28 px-6 relative z-10">
+        <div class="max-w-7xl mx-auto">
+            
+            <div class="text-center mb-16">
+                <span class="text-cyan-400 text-xs font-mono font-semibold tracking-widest uppercase" data-i18n="about_tag">داستان من</span>
+                <h2 class="text-3xl md:text-5xl font-black mt-2 text-white" data-i18n="about_title">درباره آرین</h2>
+                <div class="w-20 h-1.5 bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-400 mx-auto mt-4 rounded-full"></div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                
+                <!-- 3D Tilt Avatar Box -->
+                <div class="lg:col-span-5 relative tilt-card">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-purple-600 to-cyan-500 rounded-3xl blur-2xl opacity-40 hover:opacity-70 transition duration-500"></div>
+                    <div class="relative rounded-3xl glass-panel border border-white/15 p-8 text-center overflow-hidden">
+                        
+                        <div class="w-full h-80 rounded-2xl bg-gradient-to-b from-indigo-950/80 to-slate-950/90 border border-white/10 flex flex-col items-center justify-center relative overflow-hidden group">
+                            <!-- Rotating 3D style rings -->
+                            <div class="absolute w-64 h-64 border border-purple-500/20 rounded-full animate-spin-slow"></div>
+                            <div class="absolute w-48 h-48 border border-cyan-500/20 rounded-full animate-spin-slow" style="animation-direction: reverse;"></div>
+                            
+                            <!-- Stylized Astronaut Avatar -->
+                            <div class="relative z-10 w-36 h-36 rounded-full bg-gradient-to-tr from-purple-600 via-indigo-500 to-cyan-400 p-1 shadow-2xl mb-4 group-hover:scale-105 transition-transform duration-300">
+                                <div class="w-full h-full rounded-full bg-slate-950 flex items-center justify-center text-6xl text-purple-300 font-black">
+                                    <i class="fa-solid fa-user-astronaut animate-bounce" style="animation-duration: 4s;"></i>
+                                </div>
+                            </div>
+                            
+                            <h3 class="text-2xl font-black text-white z-10">Arin (آرین)</h3>
+                            <p class="text-cyan-400 text-xs font-mono mt-1 z-10">Creative 3D Architect</p>
+                        </div>
+
+                        <div class="mt-6 flex justify-between items-center text-xs text-gray-400 font-mono border-t border-white/10 pt-4">
+                            <span>LOCATION: GLOBAL / REMOTE</span>
+                            <span class="text-emerald-400 flex items-center gap-1.5"><i class="fa-solid fa-circle text-[8px]"></i> AVAILABLE</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Story & Stats Details -->
+                <div class="lg:col-span-7 space-y-6">
+                    <div class="glass-panel p-8 rounded-3xl border border-white/10 shadow-xl space-y-4">
+                        <h3 class="text-2xl font-extrabold text-white leading-snug" data-i18n="about_heading">
+                            ترکیب هنر انیمیشن و فناوری‌های پیشرفته وب
+                        </h3>
+                        <p class="text-gray-300 leading-relaxed font-light text-base" data-i18n="about_p1">
+                            من آرین هستم؛ توسعه‌دهنده وب با اشتیاق سوزان برای ساخت محیط‌های وب انیماتیک، واکنش‌گرا و فوق‌العاده روان. هدف من تغییر تجربه ساده وبگردی کاربران به یک ماجراجویی بصری جذاب است.
+                        </p>
+                        <p class="text-gray-400 leading-relaxed font-light text-sm" data-i18n="about_p2">
+                            از طراحی جزیی‌ترین افکت‌های مایکرو-اینتراکشن تا پیاده‌سازی صحنه‌های سه بعدی با استفاده از Canvas و Three.js، هر پروژه برای من بوم نقاشی دیجیتالی است که در آن تعامل و سرعت در بالاترین سطح ممکن قرار می‌گیرد.
+                        </p>
+                    </div>
+
+                    <!-- Counter Stats Cards -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <div class="glass-card p-5 rounded-2xl text-center">
+                            <div class="text-3xl font-black text-gradient-purple font-mono">+۵</div>
+                            <div class="text-xs text-gray-400 mt-1" data-i18n="stat_exp">سال تجربه</div>
+                        </div>
+                        <div class="glass-card p-5 rounded-2xl text-center">
+                            <div class="text-3xl font-black text-gradient-purple font-mono">+۴۵</div>
+                            <div class="text-xs text-gray-400 mt-1" data-i18n="stat_proj">پروژه موفق</div>
+                        </div>
+                        <div class="glass-card p-5 rounded-2xl text-center">
+                            <div class="text-3xl font-black text-gradient-purple font-mono">۱۰۰٪</div>
+                            <div class="text-xs text-gray-400 mt-1" data-i18n="stat_sat">رضایت کارفرما</div>
+                        </div>
+                        <div class="glass-card p-5 rounded-2xl text-center">
+                            <div class="text-3xl font-black text-gradient-purple font-mono">+۱۸</div>
+                            <div class="text-xs text-gray-400 mt-1" data-i18n="stat_award">افتخارات</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="py-28 px-6 relative z-10 bg-slate-950/30">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <span class="text-cyan-400 text-xs font-mono font-semibold tracking-widest uppercase" data-i18n="serv_tag">ارزش‌آفرینی</span>
+                <h2 class="text-3xl md:text-5xl font-black mt-2 text-white" data-i18n="serv_title">خدمات تخصصی آرین</h2>
+                <div class="w-20 h-1.5 bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-400 mx-auto mt-4 rounded-full"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Service 1 -->
+                <div class="glass-card tilt-card p-7 rounded-3xl border border-white/10 hover:border-purple-500/50 transition-all group">
+                    <div class="w-12 h-12 rounded-2xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-2xl mb-5 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-vr-cardboard"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2" data-i18n="s1_title">وب‌سایت‌های ۳D و WebGL</h3>
+                    <p class="text-gray-400 text-xs leading-relaxed mb-4" data-i18n="s1_desc">پیاده‌سازی محیط‌های تعاملی سه بعدی، نورپردازی نئون و صحنه‌های مجلل روی مرورگر با Three.js.</p>
+                    <ul class="text-[11px] font-mono text-purple-300 space-y-1.5 border-t border-white/10 pt-4">
+                        <li><i class="fa-solid fa-check text-cyan-400 ml-1"></i> 60 FPS Performance</li>
+                        <li><i class="fa-solid fa-check text-cyan-400 ml-1"></i> Custom Shader Visuals</li>
+                    </ul>
+                </div>
+
+                <!-- Service 2 -->
+                <div class="glass-card tilt-card p-7 rounded-3xl border border-white/10 hover:border-cyan-500/50 transition-all group">
+                    <div class="w-12 h-12 rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-2xl mb-5 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2" data-i18n="s2_title">انیمیشن و موشن فرانت‌اند</h3>
+                    <p class="text-gray-400 text-xs leading-relaxed mb-4" data-i18n="s2_desc">طراحی افکت‌های اسکرول پارالاکس، مایکرو انیمیشن‌های حس‌انگیز و تعاملات سیال با GSAP.</p>
+                    <ul class="text-[11px] font-mono text-cyan-300 space-y-1.5 border-t border-white/10 pt-4">
+                        <li><i class="fa-solid fa-check text-purple-400 ml-1"></i> ScrollTrigger Mastery</li>
+                        <li><i class="fa-solid fa-check text-purple-400 ml-1"></i> Fluid Interactions</li>
+                    </ul>
+                </div>
+
+                <!-- Service 3 -->
+                <div class="glass-card tilt-card p-7 rounded-3xl border border-white/10 hover:border-indigo-500/50 transition-all group">
+                    <div class="w-12 h-12 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-2xl mb-5 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2" data-i18n="s3_title">طراحی UI/UX و سیستم دیزاین</h3>
+                    <p class="text-gray-400 text-xs leading-relaxed mb-4" data-i18n="s3_desc">معماری سیستم‌های طراحی مدرن، تایپوگرافی هوشمند و پروتوتایپ‌های زنده با استانداردهای جهانی.</p>
+                    <ul class="text-[11px] font-mono text-indigo-300 space-y-1.5 border-t border-white/10 pt-4">
+                        <li><i class="fa-solid fa-check text-cyan-400 ml-1"></i> Atomic Design Systems</li>
+                        <li><i class="fa-solid fa-check text-cyan-400 ml-1"></i> Figma Prototypes</li>
+                    </ul>
+                </div>
+
+                <!-- Service 4 -->
+                <div class="glass-card tilt-card p-7 rounded-3xl border border-white/10 hover:border-pink-500/50 transition-all group">
+                    <div class="w-12 h-12 rounded-2xl bg-pink-500/20 text-pink-400 flex items-center justify-center text-2xl mb-5 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-microchip"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2" data-i18n="s4_title">محصولات هوشمند AI و Web3</h3>
+                    <p class="text-gray-400 text-xs leading-relaxed mb-4" data-i18n="s4_desc">خلق داشبوردهای هوش مصنوعی، رابط‌های کاربری صوتی و داشبوردهای کریپتویی نئونی.</p>
+                    <ul class="text-[11px] font-mono text-pink-300 space-y-1.5 border-t border-white/10 pt-4">
+                        <li><i class="fa-solid fa-check text-purple-400 ml-1"></i> AI Interface Design</li>
+                        <li><i class="fa-solid fa-check text-purple-400 ml-1"></i> Web Audio Synth Integration</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills Matrix Section -->
+    <section id="skills" class="py-28 px-6 relative z-10 bg-slate-950/40">
+        <div class="max-w-7xl mx-auto">
+            
+            <div class="text-center mb-16">
+                <span class="text-purple-400 text-xs font-mono font-semibold tracking-widest uppercase" data-i18n="skills_tag">توانمندی‌ها</span>
+                <h2 class="text-3xl md:text-5xl font-black mt-2 text-white" data-i18n="skills_title">ماتریس مهارت‌های آرین</h2>
+                <div class="w-20 h-1.5 bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-400 mx-auto mt-4 rounded-full"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                
+                <!-- Skill Category 1 -->
+                <div class="glass-card tilt-card p-8 rounded-3xl group">
+                    <div class="w-14 h-14 rounded-2xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-purple-400 text-2xl mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-code"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3" data-i18n="sk1_title">فرانت‌اند & انیمیشن</h3>
+                    <p class="text-gray-400 text-xs mb-6 leading-relaxed" data-i18n="sk1_desc">
+                        طراحی و ساخت رابط‌های کاربری زنده با جدیدترین فریم‌ورک‌ها و کتابخانه‌های حرکتی.
+                    </p>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between text-xs font-mono mb-1 text-gray-300">
+                                <span>JavaScript / TypeScript</span>
+                                <span>96%</span>
+                            </div>
+                            <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-white/5">
+                                <div class="h-full bg-gradient-to-r from-purple-500 to-cyan-400 rounded-full" style="width: 96%;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs font-mono mb-1 text-gray-300">
+                                <span>GSAP / Framer Motion</span>
+                                <span>92%</span>
+                            </div>
+                            <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-white/5">
+                                <div class="h-full bg-gradient-to-r from-purple-500 to-cyan-400 rounded-full" style="width: 92%;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs font-mono mb-1 text-gray-300">
+                                <span>React / Next.js</span>
+                                <span>90%</span>
+                            </div>
+                            <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-white/5">
+                                <div class="h-full bg-gradient-to-r from-purple-500 to-cyan-400 rounded-full" style="width: 90%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Skill Category 2 -->
+                <div class="glass-card tilt-card p-8 rounded-3xl group">
+                    <div class="w-14 h-14 rounded-2xl bg-cyan-600/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-2xl mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-cube"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3" data-i18n="sk2_title">طراحی 3D & WebGL</h3>
+                    <p class="text-gray-400 text-xs mb-6 leading-relaxed" data-i18n="sk2_desc">
+                        خلق دنیاهای سه بعدی در مرورگر با بهینه‌سازی بالا و نرخ نوسان روان ۶۰ فریم بر ثانیه.
+                    </p>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between text-xs font-mono mb-1 text-gray-300">
+                                <span>Three.js / WebGL</span>
+                                <span>88%</span>
+                            </div>
+                            <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-white/5">
+                                <div class="h-full bg-gradient-to-r from-cyan-500 to-indigo-500 rounded-full" style="width: 88%;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs font-mono mb-1 text-gray-300">
+                                <span>Canvas API / GLSL</span>
+                                <span>94%</span>
+                            </div>
+                            <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-white/5">
+                                <div class="h-full bg-gradient-to-r from-cyan-500 to-indigo-500 rounded-full" style="width: 94%;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs font-mono mb-1 text-gray-300">
+                                <span>Blender 3D Asset Prep</span>
+                                <span>80%</span>
+                            </div>
+                            <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-white/5">
+                                <div class="h-full bg-gradient-to-r from-cyan-500 to-indigo-500 rounded-full" style="width: 80%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Skill Category 3 -->
+                <div class="glass-card tilt-card p-8 rounded-3xl group">
+                    <div class="w-14 h-14 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 text-2xl mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-palette"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3" data-i18n="sk3_title">طراحی UI/UX & سیستم</h3>
+                    <p class="text-gray-400 text-xs mb-6 leading-relaxed" data-i18n="sk3_desc">
+                        معماری تجربه کاربر روان، پروتوتایپ‌های متحرک و دیزاین سیستم‌های پیشرفته.
+                    </p>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between text-xs font-mono mb-1 text-gray-300">
+                                <span>Figma / UI Systems</span>
+                                <span>95%</span>
+                            </div>
+                            <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-white/5">
+                                <div class="h-full bg-gradient-to-r from-indigo-500 to-pink-500 rounded-full" style="width: 95%;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs font-mono mb-1 text-gray-300">
+                                <span>Tailwind CSS / SCSS</span>
+                                <span>98%</span>
+                            </div>
+                            <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-white/5">
+                                <div class="h-full bg-gradient-to-r from-indigo-500 to-pink-500 rounded-full" style="width: 98%;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs font-mono mb-1 text-gray-300">
+                                <span>Micro Interactions</span>
+                                <span>94%</span>
+                            </div>
+                            <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-white/5">
+                                <div class="h-full bg-gradient-to-r from-indigo-500 to-pink-500 rounded-full" style="width: 94%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Shader & Particle Tech Lab Playground Section -->
+    <section id="lab" class="py-28 px-6 relative z-10">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-12">
+                <span class="text-cyan-400 text-xs font-mono font-semibold tracking-widest uppercase" data-i18n="lab_tag">⚡ آزمایشگاه زنده کدهای سه بعدی</span>
+                <h2 class="text-3xl md:text-5xl font-black mt-2 text-white" data-i18n="lab_title">تست زنده فیزیک و انیمیشن</h2>
+                <p class="text-gray-400 text-sm mt-3 max-w-xl mx-auto" data-i18n="lab_subtitle">روی بوم زیر کلیک کنید، حالت‌ها را تغییر دهید و سرعت فیزیک ذرات را دستکاری کنید!</p>
+                <div class="w-20 h-1.5 bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-400 mx-auto mt-4 rounded-full"></div>
+            </div>
+
+            <div class="glass-panel p-6 md:p-8 rounded-3xl border border-cyan-500/30 relative overflow-hidden shadow-2xl">
+                <!-- Lab Canvas Controls Bar -->
+                <div class="flex flex-wrap items-center justify-between gap-4 mb-6 border-b border-white/10 pb-4">
+                    <div class="flex items-center gap-2">
+                        <button id="mode-vortex" class="lab-mode-btn active px-4 py-2 rounded-xl text-xs font-mono font-bold bg-purple-600 text-white cursor-pointer transition-all">🌀 Vortex Mode</button>
+                        <button id="mode-wave" class="lab-mode-btn px-4 py-2 rounded-xl text-xs font-mono font-bold bg-slate-800 text-gray-300 hover:text-white cursor-pointer transition-all">🌊 Cyber Waves</button>
+                        <button id="mode-gravity" class="lab-mode-btn px-4 py-2 rounded-xl text-xs font-mono font-bold bg-slate-800 text-gray-300 hover:text-white cursor-pointer transition-all">🌌 Star Gravity</button>
+                    </div>
+
+                    <div class="flex items-center gap-6 text-xs font-mono text-gray-300">
+                        <div class="flex items-center gap-2">
+                            <span>SPEED:</span>
+                            <input type="range" id="lab-speed" min="1" max="5" value="2" class="accent-cyan-400 cursor-pointer w-24">
+                        </div>
+                        <button id="lab-clear" class="px-3 py-1.5 rounded-lg glass-panel text-cyan-300 hover:text-white border border-cyan-500/30 text-[11px] cursor-pointer">RESET CANVAS</button>
+                    </div>
+                </div>
+
+                <!-- Interactive 2D/3D Hybrid Canvas -->
+                <div class="relative w-full h-[400px] rounded-2xl bg-slate-950/80 border border-white/10 overflow-hidden group">
+                    <canvas id="lab-canvas" class="w-full h-full cursor-crosshair"></canvas>
+                    <div class="absolute bottom-4 left-4 pointer-events-none text-[11px] font-mono text-cyan-400/70 bg-slate-900/80 px-3 py-1 rounded-lg border border-white/5">
+                        <i class="fa-solid fa-hand-pointer mr-1"></i> <span data-i18n="lab_click_tip">روی صفحه کلیک کنید یا ماوس را بکشید</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="py-28 px-6 relative z-10">
+        <div class="max-w-7xl mx-auto">
+            
+            <div class="text-center mb-12">
+                <span class="text-cyan-400 text-xs font-mono font-semibold tracking-widest uppercase" data-i18n="proj_tag">نمونه‌کارها</span>
+                <h2 class="text-3xl md:text-5xl font-black mt-2 text-white" data-i18n="proj_title">پروژه‌های انیماتیک آرین</h2>
+                <div class="w-20 h-1.5 bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-400 mx-auto mt-4 rounded-full"></div>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="flex flex-wrap items-center justify-center gap-3 mb-12">
+                <button class="filter-btn active px-5 py-2 rounded-xl text-xs font-mono font-semibold glass-panel border border-cyan-400 text-cyan-300 transition-all cursor-pointer" data-filter="all" data-i18n="filter_all">همه پروژه‌ها</button>
+                <button class="filter-btn px-5 py-2 rounded-xl text-xs font-mono font-semibold glass-panel border border-white/10 text-gray-300 hover:text-white transition-all cursor-pointer" data-filter="3d" data-i18n="filter_3d">سه بعدی & WebGL</button>
+                <button class="filter-btn px-5 py-2 rounded-xl text-xs font-mono font-semibold glass-panel border border-white/10 text-gray-300 hover:text-white transition-all cursor-pointer" data-filter="web" data-i18n="filter_web">وب‌سایت انیماتیک</button>
+                <button class="filter-btn px-5 py-2 rounded-xl text-xs font-mono font-semibold glass-panel border border-white/10 text-gray-300 hover:text-white transition-all cursor-pointer" data-filter="app" data-i18n="filter_app">اپلیکیشن تعاملی</button>
+            </div>
+
+            <!-- Projects Grid Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                
+                <!-- Project Card 1 -->
+                <div class="project-card tilt-card glass-card rounded-3xl overflow-hidden border border-white/10 hover:border-cyan-500/50 transition-all duration-300 group cursor-pointer" data-category="3d">
+                    <div class="relative h-64 overflow-hidden bg-slate-900">
+                        <img src="https://placehold.co/800x600/0f172a/a855f7?text=Cyber+Metaverse+3D" alt="Project 1" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
+                        <span class="absolute top-4 right-4 px-3 py-1 rounded-full text-[10px] font-mono bg-purple-950/80 text-purple-300 border border-purple-500/40">3D Interactive</span>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-white mb-2 group-hover:text-cyan-400 transition-colors" data-i18n="p1_title">پلتفرم متالند ۳D</h3>
+                        <p class="text-gray-400 text-xs mb-4 line-clamp-2" data-i18n="p1_desc">تجارب شبیه‌سازی سه بعدی در مرورگر همراه با نورپردازی داینامیک و فیزیک نئونی.</p>
+                        <div class="flex items-center justify-between pt-4 border-t border-white/10 text-xs font-mono text-cyan-300">
+                            <span>Three.js / WebGL</span>
+                            <span class="group-hover:translate-x-[-4px] transition-transform flex items-center gap-1"><span data-i18n="view_detail">مشاهده جزئیات</span> <i class="fa-solid fa-arrow-left"></i></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project Card 2 -->
+                <div class="project-card tilt-card glass-card rounded-3xl overflow-hidden border border-white/10 hover:border-cyan-500/50 transition-all duration-300 group cursor-pointer" data-category="web">
+                    <div class="relative h-64 overflow-hidden bg-slate-900">
+                        <img src="https://placehold.co/800x600/0f172a/06b6d4?text=Neon+Sound+Synthesizer" alt="Project 2" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
+                        <span class="absolute top-4 right-4 px-3 py-1 rounded-full text-[10px] font-mono bg-cyan-950/80 text-cyan-300 border border-cyan-500/40">Animatic Web</span>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-white mb-2 group-hover:text-cyan-400 transition-colors" data-i18n="p2_title">سنتسایزر صوتی نئون</h3>
+                        <p class="text-gray-400 text-xs mb-4 line-clamp-2" data-i18n="p2_desc">استودیوی تولید صدای تعاملی با افکت‌های بصری واکنش‌گرا به ضربان موسیقی.</p>
+                        <div class="flex items-center justify-between pt-4 border-t border-white/10 text-xs font-mono text-cyan-300">
+                            <span>Web Audio API / Canvas</span>
+                            <span class="group-hover:translate-x-[-4px] transition-transform flex items-center gap-1"><span data-i18n="view_detail">مشاهده جزئیات</span> <i class="fa-solid fa-arrow-left"></i></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project Card 3 -->
+                <div class="project-card tilt-card glass-card rounded-3xl overflow-hidden border border-white/10 hover:border-cyan-500/50 transition-all duration-300 group cursor-pointer" data-category="app">
+                    <div class="relative h-64 overflow-hidden bg-slate-900">
+                        <img src="https://placehold.co/800x600/0f172a/6366f1?text=Aura+AI+Dashboard" alt="Project 3" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
+                        <span class="absolute top-4 right-4 px-3 py-1 rounded-full text-[10px] font-mono bg-indigo-950/80 text-indigo-300 border border-indigo-500/40">Interactive App</span>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-white mb-2 group-hover:text-cyan-400 transition-colors" data-i18n="p3_title">داشبورد هوشمند آرورا</h3>
+                        <p class="text-gray-400 text-xs mb-4 line-clamp-2" data-i18n="p3_desc">رابط کاربری پیشرفته تحلیل داده‌ها با انیمیشن‌های زنده و نمودارهای سیال D3.</p>
+                        <div class="flex items-center justify-between pt-4 border-t border-white/10 text-xs font-mono text-indigo-300">
+                            <span>React / GSAP / D3</span>
+                            <span class="group-hover:translate-x-[-4px] transition-transform flex items-center gap-1"><span data-i18n="view_detail">مشاهده جزئیات</span> <i class="fa-solid fa-arrow-left"></i></span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Experience Timeline Section -->
+    <section id="experience" class="py-28 px-6 relative z-10 bg-slate-950/40">
+        <div class="max-w-4xl mx-auto">
+            
+            <div class="text-center mb-16">
+                <span class="text-purple-400 text-xs font-mono font-semibold tracking-widest uppercase" data-i18n="exp_tag">مسیر رشد</span>
+                <h2 class="text-3xl md:text-5xl font-black mt-2 text-white" data-i18n="exp_title">خط زمانی فعالیت آرین</h2>
+                <div class="w-20 h-1.5 bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-400 mx-auto mt-4 rounded-full"></div>
+            </div>
+
+            <!-- Vertical Timeline Container -->
+            <div class="relative border-r-2 border-purple-500/30 pr-6 mr-4 sm:mr-8 space-y-12" id="timeline-box">
+                
+                <!-- Timeline Item 1 -->
+                <div class="relative group">
+                    <div class="absolute -right-[31px] top-1.5 w-5 h-5 rounded-full bg-purple-500 border-4 border-slate-950 group-hover:scale-125 group-hover:bg-cyan-400 transition-all duration-300"></div>
+                    <div class="glass-card p-6 rounded-2xl">
+                        <span class="text-[11px] font-mono text-cyan-300 bg-cyan-950/80 border border-cyan-500/30 px-3 py-1 rounded-full">۲۰۲۳ - PRESENT</span>
+                        <h3 class="text-xl font-bold text-white mt-3" data-i18n="e1_role">ارشد توسعه‌دهنده فرانت‌اند & انیمیشن</h3>
+                        <p class="text-xs text-purple-400 font-mono mb-3" data-i18n="e1_comp">Creative Digital Studio</p>
+                        <p class="text-gray-400 text-xs leading-relaxed" data-i18n="e1_desc">
+                            رهبری تیم پیاده‌سازی رابط‌های سه بعدی، بهینه‌سازی سرعت بارگذاری انیمیشن‌های پیچیده WebGL و پیاده‌سازی تجارب سفارشی برای مشتریان بین‌المللی.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Timeline Item 2 -->
+                <div class="relative group">
+                    <div class="absolute -right-[31px] top-1.5 w-5 h-5 rounded-full bg-indigo-500 border-4 border-slate-950 group-hover:scale-125 group-hover:bg-cyan-400 transition-all duration-300"></div>
+                    <div class="glass-card p-6 rounded-2xl">
+                        <span class="text-[11px] font-mono text-purple-300 bg-purple-950/80 border border-purple-500/30 px-3 py-1 rounded-full">۲۰۲۱ - ۲۰۲۳</span>
+                        <h3 class="text-xl font-bold text-white mt-3" data-i18n="e2_role">طراح رابط کاربری و توسعه‌دهنده وب</h3>
+                        <p class="text-xs text-purple-400 font-mono mb-3" data-i18n="e2_comp">Leading Tech Startups</p>
+                        <p class="text-gray-400 text-xs leading-relaxed" data-i18n="e2_desc">
+                            طراحی بیش از ۲۰ پروژه سیستم دیزاین، خلق لندینگ پیج‌های تعاملی با پرفورمنس بالا و انیمیشن‌های میکروسکوپی.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Timeline Item 3 -->
+                <div class="relative group">
+                    <div class="absolute -right-[31px] top-1.5 w-5 h-5 rounded-full bg-cyan-500 border-4 border-slate-950 group-hover:scale-125 group-hover:bg-cyan-400 transition-all duration-300"></div>
+                    <div class="glass-card p-6 rounded-2xl">
+                        <span class="text-[11px] font-mono text-indigo-300 bg-indigo-950/80 border border-indigo-500/30 px-3 py-1 rounded-full">۲۰۱۹ - ۲۰۲۱</span>
+                        <h3 class="text-xl font-bold text-white mt-3" data-i18n="e3_role">شروع حرفه‌ای و فریلنسینگ</h3>
+                        <p class="text-xs text-purple-400 font-mono mb-3" data-i18n="e3_comp">Freelance Global Projects</p>
+                        <p class="text-gray-400 text-xs leading-relaxed" data-i18n="e3_desc">
+                            یادگیری عمیق JavaScript، Canvas 2D و اصول طراحی موشن و خلق نخستین نمونه کارهای خلاقانه.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="py-28 px-6 relative z-10 bg-slate-950/30">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <span class="text-purple-400 text-xs font-mono font-semibold tracking-widest uppercase" data-i18n="test_tag">دیدگاه همکاران</span>
+                <h2 class="text-3xl md:text-5xl font-black mt-2 text-white" data-i18n="test_title">نظرات درباره آرین</h2>
+                <div class="w-20 h-1.5 bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-400 mx-auto mt-4 rounded-full"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Testimonial 1 -->
+                <div class="glass-card tilt-card p-8 rounded-3xl relative">
+                    <div class="flex items-center gap-1 text-amber-400 text-xs mb-4">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                    </div>
+                    <p class="text-gray-300 text-xs leading-relaxed italic mb-6" data-i18n="t1_msg">"خلاقیت آرین در پیاده‌سازی وب‌سایت سه بعدی ما فوق‌العاده بود. نرخ تعامل کاربران ما بعد از لایو شدن وب‌سایت ۳۰۰٪ رشد داشت!"</p>
+                    <div class="flex items-center gap-4 border-t border-white/10 pt-4">
+                        <div class="w-10 h-10 rounded-full bg-purple-600/30 border border-purple-400 flex items-center justify-center font-bold text-purple-300 text-sm">S</div>
+                        <div>
+                            <h4 class="text-sm font-bold text-white">Sarah Jenkins</h4>
+                            <p class="text-[11px] text-cyan-400 font-mono">Product Lead @ CyberMeta</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Testimonial 2 -->
+                <div class="glass-card tilt-card p-8 rounded-3xl relative">
+                    <div class="flex items-center gap-1 text-amber-400 text-xs mb-4">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                    </div>
+                    <p class="text-gray-300 text-xs leading-relaxed italic mb-6" data-i18n="t2_msg">"تعهد، سرعت در کدنویسی و توانایی ساخت انیمیشن‌های روان ۶۰ فریم آرین واقعاً نایاب است. برترین برنامه‌نویس وب که تا حالا دیدم."</p>
+                    <div class="flex items-center gap-4 border-t border-white/10 pt-4">
+                        <div class="w-10 h-10 rounded-full bg-cyan-600/30 border border-cyan-400 flex items-center justify-center font-bold text-cyan-300 text-sm">A</div>
+                        <div>
+                            <h4 class="text-sm font-bold text-white">Alex Rivera</h4>
+                            <p class="text-[11px] text-cyan-400 font-mono">CTO @ Nexus Studio</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Testimonial 3 -->
+                <div class="glass-card tilt-card p-8 rounded-3xl relative">
+                    <div class="flex items-center gap-1 text-amber-400 text-xs mb-4">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                    </div>
+                    <p class="text-gray-300 text-xs leading-relaxed italic mb-6" data-i18n="t3_msg">"دیزاین سیستم و لندینگ انیماتیک پروژه ما حس کاملاً آینده‌نگرانه‌ای ایجاد کرد. هماهنگی با آرین یکی از لذت‌بخش‌ترین تجربیات کاری بود."</p>
+                    <div class="flex items-center gap-4 border-t border-white/10 pt-4">
+                        <div class="w-10 h-10 rounded-full bg-indigo-600/30 border border-indigo-400 flex items-center justify-center font-bold text-indigo-300 text-sm">M</div>
+                        <div>
+                            <h4 class="text-sm font-bold text-white">مهندس محمدی</h4>
+                            <p class="text-[11px] text-cyan-400 font-mono">بنیان‌گذار استارت‌آپ ویژن</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="py-28 px-6 relative z-10">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-16">
+                <span class="text-cyan-400 text-xs font-mono font-semibold tracking-widest uppercase" data-i18n="faq_tag">سوالات رایج</span>
+                <h2 class="text-3xl md:text-5xl font-black mt-2 text-white" data-i18n="faq_title">پاسخ به سوالات شما</h2>
+                <div class="w-20 h-1.5 bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-400 mx-auto mt-4 rounded-full"></div>
+            </div>
+
+            <div class="space-y-4" id="faq-accordion">
+                <!-- FAQ Item 1 -->
+                <div class="glass-card rounded-2xl border border-white/10 overflow-hidden transition-all">
+                    <button class="faq-btn w-full p-6 text-right flex items-center justify-between text-white font-bold text-base cursor-pointer hover:text-cyan-400 transition-colors">
+                        <span data-i18n="q1">مدت زمان تحویل پروژه‌های سه بعدی چقدر است؟</span>
+                        <i class="fa-solid fa-chevron-down text-sm text-cyan-400 transition-transform"></i>
+                    </button>
+                    <div class="faq-content hidden p-6 pt-0 text-gray-300 text-xs leading-relaxed border-t border-white/5" data-i18n="a1">
+                        بسته به پیچیدگی طراحی، مدل‌های سه بعدی و سطح انیمیشن‌ها، زمان تحویل معمولاً بین ۲ الی ۵ هفته متغیر است.
+                    </div>
+                </div>
+
+                <!-- FAQ Item 2 -->
+                <div class="glass-card rounded-2xl border border-white/10 overflow-hidden transition-all">
+                    <button class="faq-btn w-full p-6 text-right flex items-center justify-between text-white font-bold text-base cursor-pointer hover:text-cyan-400 transition-colors">
+                        <span data-i18n="q2">آیا وب‌سایت‌های ۳D روی گوشی‌های موبایل روان اجرا می‌شوند؟</span>
+                        <i class="fa-solid fa-chevron-down text-sm text-cyan-400 transition-transform"></i>
+                    </button>
+                    <div class="faq-content hidden p-6 pt-0 text-gray-300 text-xs leading-relaxed border-t border-white/5" data-i18n="a2">
+                        بله! تمامی کدهای WebGL و گرافیک‌های Canvas با تکنیک‌های پیشرفته بهینه‌سازی شده و افت فریم در گوشی‌های هوشمند نخواهند داشت.
+                    </div>
+                </div>
+
+                <!-- FAQ Item 3 -->
+                <div class="glass-card rounded-2xl border border-white/10 overflow-hidden transition-all">
+                    <button class="faq-btn w-full p-6 text-right flex items-center justify-between text-white font-bold text-base cursor-pointer hover:text-cyan-400 transition-colors">
+                        <span data-i18n="q3">نحوه ثبت سفارش پروژه بین‌المللی یا داخلی به چه شکل است؟</span>
+                        <i class="fa-solid fa-chevron-down text-sm text-cyan-400 transition-transform"></i>
+                    </button>
+                    <div class="faq-content hidden p-6 pt-0 text-gray-300 text-xs leading-relaxed border-t border-white/5" data-i18n="a3">
+                        کافیست فرم بخش تماس با ما را پر کنید یا از طریق پیام‌رسان‌ها با من در ارتباط باشید تا جلسه مشاوره اولیه رایگان تنظیم شود.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-28 px-6 relative z-10">
+        <div class="max-w-7xl mx-auto">
+            
+            <div class="text-center mb-16">
+                <span class="text-cyan-400 text-xs font-mono font-semibold tracking-widest uppercase" data-i18n="contact_tag">ارتباط مستقیم</span>
+                <h2 class="text-3xl md:text-5xl font-black mt-2 text-white" data-i18n="contact_title">با آرین در تماس باش</h2>
+                <div class="w-20 h-1.5 bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-400 mx-auto mt-4 rounded-full"></div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                
+                <!-- Contact Form -->
+                <div class="lg:col-span-7 glass-card p-8 rounded-3xl">
+                    <h3 class="text-2xl font-bold text-white mb-6" data-i18n="contact_form_title">برام یک پیام بفرست</h3>
+                    <form id="contact-form" class="space-y-5">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                            <div>
+                                <label class="block text-xs font-mono text-gray-300 mb-2" data-i18n="f_name">نام شما</label>
+                                <input type="text" required placeholder="مثلاً: علی رضایی" class="w-full bg-slate-900/90 border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm focus:outline-none focus:border-cyan-400 transition-colors" id="f-name-input">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-mono text-gray-300 mb-2" data-i18n="f_email">ایمیل شما</label>
+                                <input type="email" required placeholder="name@example.com" class="w-full bg-slate-900/90 border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm focus:outline-none focus:border-cyan-400 transition-colors">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-mono text-gray-300 mb-2" data-i18n="f_subject">موضوع گفتگو</label>
+                            <input type="text" required placeholder="سفارش پروژه انیماتیک / مشاوره" class="w-full bg-slate-900/90 border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm focus:outline-none focus:border-cyan-400 transition-colors" id="f-subject-input">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-mono text-gray-300 mb-2" data-i18n="f_msg">متن پیام</label>
+                            <textarea rows="4" required placeholder="شرح ایده‌ها و جزئیات پروژه..." class="w-full bg-slate-900/90 border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm focus:outline-none focus:border-cyan-400 transition-colors resize-none" id="f-msg-input"></textarea>
+                        </div>
+                        <button type="submit" class="btn-shimmer magnetic-btn w-full py-4 rounded-xl text-white font-bold text-base shadow-xl flex items-center justify-center gap-3 cursor-pointer">
+                            <span data-i18n="f_btn">ارسال سریع پیام</span>
+                            <i class="fa-solid fa-paper-plane text-cyan-300"></i>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Interactive Multilingual Terminal -->
+                <div class="lg:col-span-5 glass-card p-6 rounded-3xl flex flex-col h-full border border-cyan-500/20">
+                    <div class="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
+                            <span class="w-3 h-3 rounded-full bg-yellow-500 inline-block"></span>
+                            <span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>
+                        </div>
+                        <span class="text-xs font-mono text-gray-400">arin-cli v3.0.1</span>
+                    </div>
+
+                    <div id="terminal-out" class="font-mono text-xs text-emerald-400 space-y-2 flex-grow overflow-y-auto max-h-64 p-3 bg-slate-950 rounded-xl border border-white/5">
+                        <p class="text-gray-400">// Interactive CLI System</p>
+                        <p class="text-purple-400">Type <span class="text-yellow-300">'help'</span> to see available commands.</p>
+                    </div>
+
+                    <div class="mt-4 flex items-center gap-2 bg-slate-900 rounded-xl px-3 py-2 border border-white/10 font-mono text-xs">
+                        <span class="text-cyan-400">arin@portfolio:~$</span>
+                        <input type="text" id="terminal-input" placeholder="type a command..." class="bg-transparent text-white focus:outline-none w-full">
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 border-t border-white/10 relative z-10 glass-panel">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
+            
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-purple-600 to-cyan-400 flex items-center justify-center text-white font-bold text-sm">آ</div>
+                <span class="text-xs font-semibold text-gray-300" data-i18n="footer_credits">طراحی شده با عشق و کد توسط <span class="text-cyan-400">آرین</span></span>
+            </div>
+
+            <div class="text-xs font-mono text-gray-400">
+                &copy; ۲۰۲۶ ARIN. All rights reserved.
+            </div>
+
+            <a href="#hero" class="w-10 h-10 rounded-xl glass-panel border border-white/10 flex items-center justify-center hover:text-cyan-400 hover:border-cyan-500/50 transition-all">
+                <i class="fa-solid fa-arrow-up"></i>
+            </a>
+        </div>
+    </footer>
+
+    <!-- Project Details Modal -->
+    <div id="project-modal" class="fixed inset-0 z-50 flex items-center justify-center p-6 glass-panel backdrop-blur-2xl opacity-0 pointer-events-none transition-all duration-300">
+        <div class="bg-slate-950 border border-white/15 rounded-3xl max-w-2xl w-full p-8 relative shadow-2xl space-y-6">
+            <button id="close-modal" class="absolute top-6 left-6 text-gray-400 hover:text-white text-xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 id="modal-title" class="text-2xl font-bold text-white">عنوان پروژه</h3>
+            <p id="modal-desc" class="text-gray-300 text-sm leading-relaxed">توضیحات کامل پروژه...</p>
+            <div class="flex items-center gap-4">
+                <a href="#" class="btn-shimmer px-6 py-2.5 rounded-xl text-white font-semibold text-xs" data-i18n="modal_demo">مشاهده دمو زنده</a>
+                <button id="modal-btn-close" class="px-6 py-2.5 rounded-xl glass-panel border border-white/10 text-gray-300 hover:text-white text-xs" data-i18n="modal_close">بستن</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const i18n = {
+            fa: {
+                nav_about: "درباره من",
+                nav_services: "خدمات",
+                nav_skills: "تخصص‌ها",
+                nav_lab: "⚡ آزمایشگاه",
+                nav_projects: "پروژه‌ها",
+                nav_experience: "مسیر من",
+                nav_faq: "سوالات",
+                nav_contact: "ارتباط",
+                nav_cta: "گفتگو با آرین",
+                hero_badge: "آماده پذیرش پروژه‌های خفن و بین‌المللی",
+                hero_greeting: "سلام، من",
+                hero_name: "آرین",
+                hero_greeting_end: "هستم",
+                hero_desc: "معمار تجارب دیجیتال مدرن، برنامه‌نویس خلاق و طراح وب‌سایت‌های ۳ بعدی و تعاملی. خلق پلتفرم‌های متمایز با ترکیب هنر، کد و انیمیشن.",
+                hero_cta1: "دیدن نمونه کارها",
+                hero_cta2: "ارتباط با آرین",
+                about_tag: "داستان من",
+                about_title: "درباره آرین",
+                about_heading: "ترکیب هنر انیمیشن و فناوری‌های پیشرفته وب",
+                about_p1: "من آرین هستم؛ توسعه‌دهنده وب با اشتیاق سوزان برای ساخت محیط‌های وب انیماتیک، واکنش‌گرا و فوق‌العاده روان. هدف من تغییر تجربه ساده وبگردی کاربران به یک ماجراجویی بصری جذاب است.",
+                about_p2: "از طراحی جزیی‌ترین افکت‌های مایکرو-اینتراکشن تا پیاده‌سازی صحنه‌های سه بعدی با استفاده از Canvas و Three.js، هر پروژه برای من بوم نقاشی دیجیتالی است که در آن تعامل و سرعت در بالاترین سطح قرار می‌گیرد.",
+                stat_exp: "سال تجربه",
+                stat_proj: "پروژه موفق",
+                stat_sat: "رضایت کارفرما",
+                stat_award: "افتخارات",
+                serv_tag: "ارزش‌آفرینی",
+                serv_title: "خدمات تخصصی آرین",
+                s1_title: "وب‌سایت‌های ۳D و WebGL",
+                s1_desc: "پیاده‌سازی محیط‌های تعاملی سه بعدی، نورپردازی نئون و صحنه‌های مجلل روی مرورگر با Three.js.",
+                s2_title: "انیمیشن و موشن فرانت‌اند",
+                s2_desc: "طراحی افکت‌های اسکرول پارالاکس، مایکرو انیمیشن‌های حس‌انگیز و تعاملات سیال با GSAP.",
+                s3_title: "طراحی UI/UX و سیستم دیزاین",
+                s3_desc: "معماری سیستم‌های طراحی مدرن، تایپوگرافی هوشمند و پروتوتایپ‌های زنده با استانداردهای جهانی.",
+                s4_title: "محصولات هوشمند AI و Web3",
+                s4_desc: "خلق داشبوردهای هوش مصنوعی، رابط‌های کاربری صوتی و داشبوردهای کریپتویی نئونی.",
+                skills_tag: "توانمندی‌ها",
+                skills_title: "ماتریس مهارت‌های آرین",
+                sk1_title: "فرانت‌اند & انیمیشن",
+                sk1_desc: "طراحی و ساخت رابط‌های کاربری زنده با جدیدترین فریم‌ورک‌ها و کتابخانه‌های حرکتی.",
+                sk2_title: "طراحی 3D & WebGL",
+                sk2_desc: "خلق دنیاهای سه بعدی در مرورگر با بهینه‌سازی بالا و نرخ نوسان روان ۶۰ فریم بر ثانیه.",
+                sk3_title: "طراحی UI/UX & سیستم",
+                sk3_desc: "معماری تجربه کاربر روان، پروتوتایپ‌های متحرک و دیزاین سیستم‌های پیشرفته.",
+                lab_tag: "⚡ آزمایشگاه زنده کدهای سه بعدی",
+                lab_title: "تست زنده فیزیک و انیمیشن",
+                lab_subtitle: "روی بوم زیر کلیک کنید، حالت‌ها را تغییر دهید و سرعت فیزیک ذرات را دستکاری کنید!",
+                lab_click_tip: "روی صفحه کلیک کنید یا ماوس را بکشید",
+                proj_tag: "نمونه‌کارها",
+                proj_title: "پروژه‌های انیماتیک آرین",
+                filter_all: "همه پروژه‌ها",
+                filter_3d: "سه بعدی & WebGL",
+                filter_web: "وب‌سایت انیماتیک",
+                filter_app: "اپلیکیشن تعاملی",
+                p1_title: "پلتفرم متالند ۳D",
+                p1_desc: "تجارب شبیه‌سازی سه بعدی در مرورگر همراه با نورپردازی داینامیک و فیزیک نئونی.",
+                p2_title: "سنتسایزر صوتی نئون",
+                p2_desc: "استودیوی تولید صدای تعاملی با افکت‌های بصری واکنش‌گرا به ضربان موسیقی.",
+                p3_title: "داشبورد هوشمند آرورا",
+                p3_desc: "رابط کاربری پیشرفته تحلیل داده‌ها با انیمیشن‌های زنده و نمودارهای سیال D3.",
+                view_detail: "مشاهده جزئیات",
+                exp_tag: "مسیر رشد",
+                exp_title: "خط زمانی فعالیت آرین",
+                e1_role: "ارشد توسعه‌دهنده فرانت‌اند & انیمیشن",
+                e1_comp: "استودیو خلاق دیجیتال",
+                e1_desc: "رهبری تیم پیاده‌سازی رابط‌های سه بعدی، بهینه‌سازی سرعت بارگذاری انیمیشن‌های پیچیده WebGL و پیاده‌سازی تجارب سفارشی.",
+                e2_role: "طراح رابط کاربری و توسعه‌دهنده وب",
+                e2_comp: "استارت‌آپ‌های پیشرو فناوری",
+                e2_desc: "طراحی بیش از ۲۰ پروژه سیستم دیزاین، خلق لندینگ پیج‌های تعاملی با پرفورمنس بالا و انیمیشن‌های میکروسکوپی.",
+                e3_role: "شروع حرفه‌ای و فریلنسینگ",
+                e3_comp: "پروژه‌های بین‌المللی فریلنس",
+                e3_desc: "یادگیری عمیق JavaScript، Canvas 2D و اصول طراحی موشن و خلق نخستین نمونه کارهای خلاقانه.",
+                test_tag: "دیدگاه همکاران",
+                test_title: "نظرات درباره آرین",
+                t1_msg: "\"خلاقیت آرین در پیاده‌سازی وب‌سایت سه بعدی ما فوق‌العاده بود. نرخ تعامل کاربران ما بعد از لایو شدن وب‌سایت ۳۰۰٪ رشد داشت!\"",
+                t2_msg: "\"تعهد، سرعت در کدنویسی و توانایی ساخت انیمیشن‌های روان ۶۰ فریم آرین واقعاً نایاب است. برترین برنامه‌نویس وب که تا حالا دیدم.\"",
+                t3_msg: "\"دیزاین سیستم و لندینگ انیماتیک پروژه ما حس کاملاً آینده‌نگرانه‌ای ایجاد کرد. هماهنگی با آرین یکی از لذت‌بخش‌ترین تجربیات کاری بود.\"",
+                faq_tag: "سوالات رایج",
+                faq_title: "پاسخ به سوالات شما",
+                q1: "مدت زمان تحویل پروژه‌های سه بعدی چقدر است؟",
+                a1: "بسته به پیچیدگی طراحی، مدل‌های سه بعدی و سطح انیمیشن‌ها، زمان تحویل معمولاً بین ۲ الی ۵ هفته متغیر است.",
+                q2: "آیا وب‌سایت‌های ۳D روی گوشی‌های موبایل روان اجرا می‌شوند؟",
+                a2: "بله! تمامی کدهای WebGL و گرافیک‌های Canvas با تکنیک‌های پیشرفته بهینه‌سازی شده و افت فریم در گوشی‌های هوشمند نخواهند داشت.",
+                q3: "نحوه ثبت سفارش پروژه بین‌المللی یا داخلی به چه شکل است؟",
+                a3: "کافیست فرم بخش تماس با ما را پر کنید یا از طریق پیام‌رسان‌ها با من در ارتباط باشید تا جلسه مشاوره اولیه رایگان تنظیم شود.",
+                contact_tag: "ارتباط مستقیم",
+                contact_title: "با آرین در تماس باش",
+                contact_form_title: "برام یک پیام بفرست",
+                f_name: "نام شما",
+                f_email: "ایمیل شما",
+                f_subject: "موضوع گفتگو",
+                f_msg: "متن پیام",
+                f_btn: "ارسال سریع پیام",
+                footer_credits: "طراحی شده با عشق و کد توسط آرین",
+                modal_demo: "مشاهده دمو زنده",
+                modal_close: "بستن"
+            },
+            en: {
+                nav_about: "About",
+                nav_services: "Services",
+                nav_skills: "Skills",
+                nav_lab: "⚡ Lab",
+                nav_projects: "Projects",
+                nav_experience: "Journey",
+                nav_faq: "FAQ",
+                nav_contact: "Contact",
+                nav_cta: "Let's Talk",
+                hero_badge: "Available for Elite & Global Projects",
+                hero_greeting: "Hello, I'm",
+                hero_name: "Arin",
+                hero_greeting_end: "",
+                hero_desc: "Architect of modern digital experiences, creative developer & 3D interactive web creator. Crafting extraordinary platforms with art, code & motion.",
+                hero_cta1: "View Portfolio",
+                hero_cta2: "Contact Arin",
+                about_tag: "MY STORY",
+                about_title: "About Arin",
+                about_heading: "Merging Motion Art with Advanced Web Engineering",
+                about_p1: "I am Arin, a passionate web developer dedicated to constructing immersive, highly reactive, and insanely smooth 3D web applications.",
+                about_p2: "From micro-interaction physics to full-scale WebGL 3D scenes using Three.js and Canvas, every project is a digital canvas crafted for ultimate performance.",
+                stat_exp: "Years Experience",
+                stat_proj: "Projects Done",
+                stat_sat: "Client Satisfaction",
+                stat_award: "Awards & Honors",
+                serv_tag: "WHAT I OFFER",
+                serv_title: "Arin's Core Services",
+                s1_title: "3D & WebGL Experiences",
+                s1_desc: "Interactive 3D environments, neon shader graphics, and luxury web scenes with Three.js.",
+                s2_title: "Frontend Motion & FX",
+                s2_desc: "Parallax scroll effects, reactive micro-animations, and fluid physics with GSAP.",
+                s3_title: "UI/UX & Design Systems",
+                s3_desc: "Modern atomic design architectures, smart typography, and interactive prototypes.",
+                s4_title: "AI & Web3 Products",
+                s4_desc: "Building AI dashboard interfaces, spatial sound synth apps, and Web3 platforms.",
+                skills_tag: "CAPABILITIES",
+                skills_title: "Arin's Skill Matrix",
+                sk1_title: "Frontend & Motion",
+                sk1_desc: "Building dynamic interfaces with modern frameworks and cutting-edge motion libraries.",
+                sk2_title: "3D Design & WebGL",
+                sk2_desc: "Creating high-performance 3D web environments running at smooth 60 FPS.",
+                sk3_title: "UI/UX & Systems",
+                sk3_desc: "Architecting slick user experiences, animated prototypes, and modern design systems.",
+                lab_tag: "⚡ LIVE 3D & PHYSICS LAB",
+                lab_title: "Interactive Playground",
+                lab_subtitle: "Click the canvas below, switch visual physics modes, and tweak speed in real-time!",
+                lab_click_tip: "Click on canvas or drag mouse around",
+                proj_tag: "PORTFOLIO",
+                proj_title: "Animatic Showcase",
+                filter_all: "All Projects",
+                filter_3d: "3D & WebGL",
+                filter_web: "Animatic Web",
+                filter_app: "Interactive Apps",
+                p1_title: "Metaland 3D Platform",
+                p1_desc: "Interactive 3D simulation in browser with dynamic lighting and neon particle physics.",
+                p2_title: "Neon Sound Synthesizer",
+                p2_desc: "Interactive Web Audio studio with real-time reactive audio visualizer graphics.",
+                p3_title: "Aura AI Smart Dashboard",
+                p3_desc: "Advanced data analysis interface featuring fluid D3 motion charts & GSAP animations.",
+                view_detail: "View Details",
+                exp_tag: "MY JOURNEY",
+                exp_title: "Timeline & Career",
+                e1_role: "Lead Frontend & Motion Dev",
+                e1_comp: "Creative Digital Studio",
+                e1_desc: "Leading 3D Web interface engineering, WebGL optimization, and custom client experiences.",
+                e2_role: "UI/UX & Web Developer",
+                e2_comp: "Tech Startups",
+                e2_desc: "Designed 20+ design systems, created high-performance landing pages with fluid animations.",
+                e3_role: "Freelance & Creative Explorer",
+                e3_comp: "Global Freelance Projects",
+                e3_desc: "Deep dive into JS, Canvas 2D, and motion graphics, delivering initial interactive projects.",
+                test_tag: "TESTIMONIALS",
+                test_title: "What People Say",
+                t1_msg: "\"Arin's creativity in building our 3D platform was outstanding. User engagement jumped by 300% post-launch!\"",
+                t2_msg: "\"Arin's dedication, coding speed, and ability to craft 60FPS fluid motion are truly rare. Outstanding dev.\"",
+                t3_msg: "\"Our design system and animatic landing page felt like the future. Working with Arin was pure joy.\"",
+                faq_tag: "FREQUENT QUESTIONS",
+                faq_title: "Answers & Info",
+                q1: "How long does a 3D web project take?",
+                a1: "Depending on complexity, 3D modeling, and motion design, delivery typically takes 2 to 5 weeks.",
+                q2: "Are 3D websites smooth on mobile devices?",
+                a2: "Absolutely! All WebGL shaders and canvas graphics are optimized for flawless 60 FPS mobile performance.",
+                q3: "How do we start a project together?",
+                a3: "Simply fill out the contact form or reach out via socials to schedule a free intro call.",
+                contact_tag: "GET IN TOUCH",
+                contact_title: "Contact Arin Today",
+                contact_form_title: "Send Me a Message",
+                f_name: "Your Name",
+                f_email: "Your Email",
+                f_subject: "Subject",
+                f_msg: "Message",
+                f_btn: "Send Message Now",
+                footer_credits: "Designed & Built with passion by Arin",
+                modal_demo: "Live Preview",
+                modal_close: "Close"
+            }
+        };
+
+/* ... existing code ... -->
+        langBtn.addEventListener('click', () => {
+            switchLanguage(currentLang === 'fa' ? 'en' : 'fa');
+        });
+
+        // Enhanced Three.js Background with Dynamic Platonic Solids
+        const canvas3D = document.getElementById('webgl-canvas');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas3D, alpha: true, antialias: true });
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        // 3D Particles Sphere Scene
+        const geometry = new THREE.BufferGeometry();
+        const particlesCount = 950;
+        const posArray = new Float32Array(particlesCount * 3);
+
+        for (let i = 0; i < particlesCount * 3; i++) {
+            posArray[i] = (Math.random() - 0.5) * 16;
+        }
+
+        geometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+
+        const material = new THREE.PointsMaterial({
+            size: 0.032,
+            color: 0xa855f7,
+            transparent: true,
+            opacity: 0.85
+        });
+
+        const particlesMesh = new THREE.Points(geometry, material);
+        scene.add(particlesMesh);
+
+        // Wireframe Torus Knot
+        const torusGeo = new THREE.TorusKnotGeometry(2.2, 0.5, 120, 16);
+        const torusMat = new THREE.MeshBasicMaterial({
+            color: 0x06b6d4,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.12
+        });
+        const torusMesh = new THREE.Mesh(torusGeo, torusMat);
+        scene.add(torusMesh);
+
+        // Floating Platonic Icosahedron Shape
+        const icoGeo = new THREE.IcosahedronGeometry(1.2, 0);
+        const icoMat = new THREE.MeshBasicMaterial({ color: 0xa855f7, wireframe: true, transparent: true, opacity: 0.25 });
+        const icoMesh = new THREE.Mesh(icoGeo, icoMat);
+        icoMesh.position.set(-4, 2, -2);
+        scene.add(icoMesh);
+
+        camera.position.z = 6;
+
+        let mouseX = 0;
+        let mouseY = 0;
+
+        window.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX / window.innerWidth) - 0.5;
+            mouseY = (e.clientY / window.innerHeight) - 0.5;
+        });
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        function animate3D() {
+            requestAnimationFrame(animate3D);
+
+            particlesMesh.rotation.y += 0.001;
+            torusMesh.rotation.x += 0.003;
+            torusMesh.rotation.y += 0.004;
+
+            icoMesh.rotation.x += 0.01;
+            icoMesh.rotation.y += 0.01;
+
+            particlesMesh.rotation.x += (mouseY * 0.5 - particlesMesh.rotation.x) * 0.05;
+            particlesMesh.rotation.y += (mouseX * 0.5 - particlesMesh.rotation.y) * 0.05;
+
+            renderer.render(scene, camera);
+        }
+        animate3D();
+
+        // Interactive Tech Lab Canvas Engine
+        const labCanvas = document.getElementById('lab-canvas');
+        if (labCanvas) {
+            const ctx = labCanvas.getContext('2d');
+            let labParticles = [];
+            let labMode = 'vortex';
+            let labSpeed = 2;
+
+            function resizeLabCanvas() {
+                labCanvas.width = labCanvas.parentElement.clientWidth;
+                labCanvas.height = labCanvas.parentElement.clientHeight;
+            }
+            resizeLabCanvas();
+            window.addEventListener('resize', resizeLabCanvas);
+
+            class Particle {
+                constructor(x, y) {
+                    this.x = x || Math.random() * labCanvas.width;
+                    this.y = y || Math.random() * labCanvas.height;
+                    this.size = Math.random() * 3 + 1;
+                    this.vx = (Math.random() - 0.5) * 2;
+                    this.vy = (Math.random() - 0.5) * 2;
+                    this.color = Math.random() > 0.5 ? '#06b6d4' : '#a855f7';
+                    this.angle = Math.random() * Math.PI * 2;
+                }
+
+                update() {
+                    if (labMode === 'vortex') {
+                        const cx = labCanvas.width / 2;
+                        const cy = labCanvas.height / 2;
+                        const dx = cx - this.x;
+                        const dy = cy - this.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        this.angle += 0.02 * labSpeed;
+                        this.x += Math.cos(this.angle) * labSpeed + (dx / dist) * 0.5;
+                        this.y += Math.sin(this.angle) * labSpeed + (dy / dist) * 0.5;
+                    } else if (labMode === 'wave') {
+                        this.x += this.vx * labSpeed;
+                        this.y += Math.sin(this.x * 0.02) * labSpeed;
+                        if (this.x > labCanvas.width) this.x = 0;
+                    } else if (labMode === 'gravity') {
+                        this.x += this.vx * labSpeed;
+                        this.y += this.vy * labSpeed;
+                        if (this.x < 0 || this.x > labCanvas.width) this.vx *= -1;
+                        if (this.y < 0 || this.y > labCanvas.height) this.vy *= -1;
+                    }
+                }
+
+                draw() {
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            function initLab() {
+                labParticles = [];
+                for (let i = 0; i < 90; i++) {
+                    labParticles.push(new Particle());
+                }
+            }
+            initLab();
+
+            function renderLab() {
+                ctx.fillStyle = 'rgba(3, 7, 18, 0.2)';
+                ctx.fillRect(0, 0, labCanvas.width, labCanvas.height);
+
+                labParticles.forEach(p => {
+                    p.update();
+                    p.draw();
+                });
+
+                requestAnimationFrame(renderLab);
+            }
+            renderLab();
+
+            // Lab Interactions
+            labCanvas.addEventListener('mousedown', (e) => {
+                const rect = labCanvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                for (let i = 0; i < 15; i++) {
+                    labParticles.push(new Particle(x, y));
+                }
+                playSynthBeep(900, 0.06);
+            });
+
+            document.getElementById('mode-vortex').addEventListener('click', (e) => setLabMode('vortex', e.target));
+            document.getElementById('mode-wave').addEventListener('click', (e) => setLabMode('wave', e.target));
+            document.getElementById('mode-gravity').addEventListener('click', (e) => setLabMode('gravity', e.target));
+
+            function setLabMode(mode, btn) {
+                labMode = mode;
+                document.querySelectorAll('.lab-mode-btn').forEach(b => {
+                    b.className = 'lab-mode-btn px-4 py-2 rounded-xl text-xs font-mono font-bold bg-slate-800 text-gray-300 hover:text-white cursor-pointer transition-all';
+                });
+                btn.className = 'lab-mode-btn active px-4 py-2 rounded-xl text-xs font-mono font-bold bg-purple-600 text-white cursor-pointer transition-all';
+                playSynthBeep(700, 0.05);
+            }
+
+            document.getElementById('lab-speed').addEventListener('input', (e) => {
+                labSpeed = parseFloat(e.target.value);
+            });
+
+            document.getElementById('lab-clear').addEventListener('click', () => {
+                initLab();
+                playSynthBeep(400, 0.08);
+            });
+        }
+
+        // FAQ Accordion Logic
+        document.querySelectorAll('.faq-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const content = btn.nextElementSibling;
+                const icon = btn.querySelector('i');
+                const isOpen = !content.classList.contains('hidden');
+
+                document.querySelectorAll('.faq-content').forEach(c => c.classList.add('hidden'));
+                document.querySelectorAll('.faq-btn i').forEach(i => i.style.transform = 'rotate(0deg)');
+
+                if (!isOpen) {
+                    content.classList.remove('hidden');
+                    icon.style.transform = 'rotate(180deg)';
+                    playSynthBeep(650, 0.04);
+                }
+            });
+        });
+
+        /* Magnetic Buttons Effect */
+        document.querySelectorAll('.magnetic-btn').forEach(btn => {
+            btn.addEventListener('mousemove', (e) => {
+                const rect = btn.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                btn.style.transform = `translate(${x * 0.25}px, ${y * 0.25}px)`;
+            });
+
+            btn.addEventListener('mouseleave', () => {
+                btn.style.transform = 'translate(0px, 0px)';
+            });
+        });
+
+        /* Custom Cursor Motion */
+        const cursorDot = document.getElementById('cursor-dot');
+        const cursorOutline = document.getElementById('cursor-outline');
+
+        window.addEventListener('mousemove', (e) => {
+            cursorDot.style.left = `${e.clientX}px`;
+            cursorDot.style.top = `${e.clientY}px`;
+
+            cursorOutline.animate({
+                left: `${e.clientX}px`,
+                top: `${e.clientY}px`
+            }, { duration: 400, fill: "forwards" });
+        });
+
+        document.querySelectorAll('a, button, input, textarea, .project-card').forEach(el => {
+            el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+            el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+        });
+
+        const typedTextSpan = document.getElementById("typed-text");
+        const textsFA = ["معمار وب‌سایت‌های سه‌بعدی", "توسعه‌دهنده انیماتیک و وب خلاقانه", "متخصص Three.js & GSAP"];
+        const textsEN = ["3D Web Architect", "Creative Animatic Developer", "Three.js & GSAP Specialist"];
+        let textIdx = 0;
+        let charIdx = 0;
+
+        function type() {
+            const arr = currentLang === 'en' ? textsEN : textsFA;
+            if (charIdx < arr[textIdx].length) {
+                typedTextSpan.textContent += arr[textIdx].charAt(charIdx);
+                charIdx++;
+                setTimeout(type, 80);
+            } else {
+                setTimeout(erase, 2000);
+            }
+        }
+
+        function erase() {
+            const arr = currentLang === 'en' ? textsEN : textsFA;
+            if (charIdx > 0) {
+                typedTextSpan.textContent = arr[textIdx].substring(0, charIdx - 1);
+                charIdx--;
+                setTimeout(erase, 40);
+            } else {
+                textIdx = (textIdx + 1) % arr.length;
+                setTimeout(type, 500);
+            }
+        }
+        document.addEventListener("DOMContentLoaded", () => setTimeout(type, 1000));
+
+        /* Toast Feedback */
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            toast.style.opacity = '1';
+            toast.style.transform = 'translate(-50%, 0)';
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translate(-50%, -20px)';
+            }, 3000);
+        }
+
+        /* Web Audio API Sound Generator */
+        let soundEnabled = false;
+        const soundBtn = document.getElementById('sound-btn');
+        const soundIcon = document.getElementById('sound-icon');
+
+        soundBtn.addEventListener('click', () => {
+            soundEnabled = !soundEnabled;
+            if (soundEnabled) {
+                soundIcon.className = 'fa-solid fa-volume-high text-cyan-400';
+                showToast(currentLang === 'en' ? 'Audio FX Enabled!' : 'افکت صوتی تعاملی فعال شد!');
+                playSynthBeep(600, 0.1);
+            } else {
+                soundIcon.className = 'fa-solid fa-volume-xmark text-gray-400';
+                showToast(currentLang === 'en' ? 'Audio FX Disabled' : 'افکت صوتی خاموش شد');
+            }
+        });
+
+        function playSynthBeep(freq = 440, duration = 0.05) {
+            if (!soundEnabled) return;
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {}
+        }
+
+        document.querySelectorAll('button, a').forEach(el => {
+            el.addEventListener('click', () => playSynthBeep(750, 0.04));
+        });
+
+        const termInput = document.getElementById('terminal-input');
+        const termOut = document.getElementById('terminal-out');
+
+        termInput.addEventListener('keydown', (e) => {
+            playSynthBeep(1200 + Math.random() * 200, 0.02);
+            if (e.key === 'Enter') {
+                const cmd = termInput.value.trim().toLowerCase();
+                termInput.value = '';
+                
+                const pCmd = document.createElement('p');
+                pCmd.className = 'text-white';
+                pCmd.innerText = `arin@portfolio:~$ ${cmd}`;
+                termOut.appendChild(pCmd);
+
+                let res = '';
+                if (cmd === 'help') {
+                    res = currentLang === 'en' ? "Commands: 'about', 'skills', 'projects', 'contact', 'clear'" : "دستورات: 'about', 'skills', 'projects', 'contact', 'clear'";
+                } else if (cmd === 'about') {
+                    res = currentLang === 'en' ? "Arin - Creative 3D Web Architect & Motion Dev." : "آرین - توسعه‌دهنده وب‌سایت‌های ۳ بعدی و تعاملی.";
+                } else if (cmd === 'skills') {
+                    res = "Three.js, WebGL, GSAP, React, TypeScript, Tailwind CSS";
+                } else if (cmd === 'projects') {
+                    res = currentLang === 'en' ? "3 featured interactive 3D projects rendered." : "۳ پروژه اصلی در صفحه بارگذاری شده‌اند.";
+                } else if (cmd === 'clear') {
+                    termOut.innerHTML = '';
+                    return;
+                } else {
+                    res = `Unknown command: '${cmd}'. Type 'help'`;
+                }
+
+                const pRes = document.createElement('p');
+                pRes.className = 'text-cyan-300';
+                pRes.innerText = res;
+                termOut.appendChild(pRes);
+                termOut.scrollTop = termOut.scrollHeight;
+            }
+        });
+
+        /* Contact Form Submission */
+        document.getElementById('contact-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            showToast(currentLang === 'en' ? 'Message sent successfully to Arin!' : 'پیام شما با موفقیت برای آرین ارسال شد!');
+            e.target.reset();
+        });
+
+        /* Modal Logic */
+        const modal = document.getElementById('project-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalDesc = document.getElementById('modal-desc');
+
+        document.querySelectorAll('.project-card').forEach(card => {
+            card.addEventListener('click', () => {
+                modalTitle.innerText = card.querySelector('h3').innerText;
+                modalDesc.innerText = card.querySelector('p').innerText;
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+            });
+        });
+
+        document.getElementById('close-modal').addEventListener('click', closeModal);
+        document.getElementById('modal-btn-close').addEventListener('click', closeModal);
+        function closeModal() {
+            modal.classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        /* Mobile Menu */
+        const mobileToggle = document.getElementById('mobile-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        mobileToggle.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            mobileMenu.classList.toggle('flex');
+        });
+
+        document.querySelectorAll('.mobile-link').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+                mobileMenu.classList.remove('flex');
+            });
+        });
+
+        /* GSAP Scroll Animations */
+        gsap.registerPlugin(ScrollTrigger);
+
+        gsap.from('#hero h1', { opacity: 0, y: 40, duration: 1.2, delay: 0.2 });
+        gsap.from('#hero p', { opacity: 0, y: 30, duration: 1, delay: 0.5 });
+
+        gsap.utils.toArray('.glass-card').forEach(card => {
+            gsap.from(card, {
+                scrollTrigger: {
+                    trigger: card,
+                    start: "top 88%"
+                },
+                opacity: 0,
+                y: 50,
+                duration: 0.8,
+                ease: "power3.out"
+            });
+        });
+    </script>
+</body>
+</html>
